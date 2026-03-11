@@ -4,7 +4,8 @@ Smart Energy Consumption Tracking and Prediction System
 Main Flask application entry point.
 Handles routing, authentication, API endpoints, and database interaction.
 """
-
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import sqlite3
 import os
