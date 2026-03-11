@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SmartEnergy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════ -->
+<header class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-logo">⚡</div>
+    <span class="nav-title">Smart<em>Energy</em></span>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-user-pill">
+      <!-- First letter of user name as avatar -->
+      <div class="nav-avatar">{{ user_name[0].upper() }}</div>
+      <span>{{ user_name }}</span>
+    </div>
+    <a href="{{ url_for('logout') }}" class="btn-logout">Sign out</a>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     MAIN
+════════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- Page heading -->
+  <div class="page-header">
+    <h2 class="page-title">Energy Dashboard</h2>
+    <p class="page-sub">Real-time tracking for your household devices</p>
+  </div>
+
+  <!-- ─────────────────────────────────────
+       STAT CARDS
+  ───────────────────────────────────── -->
+  <section class="cards-grid">
+
+    <div class="stat-card card-green">
+      <div class="card-top">
+        <span class="card-label">Today's Usage</span>
+        <div class="card-icon-box">☀️</div>
+      </div>
+      <div class="card-value" id="todayKwh">
+        {{ today_kwh }}<span class="card-unit">kWh</span>
+      </div>
+    </div>
+
+    <div class="stat-card card-blue">
+      <div class="card-top">
+        <span class="card-label">This Week</span>
+        <div class="card-icon-box">📅</div>
+      </div>
+      <div class="card-value">
+        {{ week_kwh }}<span class="card-unit">kWh</span>
+      </div>
+    </div>
+
+    <div class="stat-card card-amber">
+      <div class="card-top">
+        <span class="card-label">This Month</span>
+        <div class="card-icon-box">🗓️</div>
+      </div>
+      <div class="card-value">
+        {{ month_kwh }}<span class="card-unit">kWh</span>
+      </div>
+    </div>
+
+    <div class="stat-card card-violet">
+      <div class="card-top">
+        <span class="card-label">Predicted Tomorrow</span>
+        <div class="card-icon-box">🔮</div>
+      </div>
+      <div class="card-value" id="predictedKwh">
+        {{ predicted }}<span class="card-unit">kWh</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ─────────────────────────────────────
+       CHART + LOG FORM
+  ───────────────────────────────────── -->
+  <div class="grid-two">
+
+    <!-- CHART -->
+    <section class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <span class="panel-title-icon">📊</span>
+          Consumption Trend
+        </h3>
+        <div class="tab-group" id="periodTabs">
+          <button class="tab-btn active" data-period="daily">Daily</button>
+          <button class="tab-btn" data-period="weekly">Weekly</button>
+          <button class="tab-btn" data-period="monthly">Monthly</button>
+          <button class="tab-btn" data-period="hourly">By Device</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="energyChart"></canvas>
+      </div>
+    </section>
+
+    <!-- LOG FORM -->
+    <section class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <span class="panel-title-icon">➕</span>
+          Log Device Usage
+        </h3>
+      </div>
+
+      <div id="logToast" class="toast hidden"></div>
+
+      <form id="logForm" class="log-form">
+
+        <div class="form-group">
+          <label for="device">Device</label>
+          <select id="device" name="device" required>
+            {% for d in devices %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="customWatt">
+            Power Rating (Watts)
+            <span class="label-hint" id="wattAutoLabel">— auto-filled, you can edit</span>
+          </label>
+          <div class="watt-input-wrap">
+            <span class="watt-icon">⚡</span>
+            <input type="number" id="customWatt" name="custom_watt"
+              min="1" max="50000" step="1" placeholder="e.g. 1500"
+              title="Change this to enter your own wattage" />
+            <span class="watt-suffix">W</span>
+          </div>
+          <span class="watt-tip" id="wattTip">Default for Fan: 75W — change if your device differs</span>
+        </div>
+
+        <div class="form-group">
+          <label for="hours">Duration (hours)</label>
+          <input type="number" id="hours" name="hours"
+            min="0.1" max="24" step="0.1" placeholder="e.g. 2.5" required />
+        </div>
+
+        <div class="form-group">
+          <label for="usageDate">Date</label>
+          <input type="date" id="usageDate" name="date" required />
+        </div>
+
+        <!-- Live kWh estimate -->
+        <div class="kwh-preview" id="kwhPreview">Estimated: — kWh</div>
+
+        <button type="submit" class="btn-primary" id="logBtn">
+          Log Usage
+        </button>
+
+      </form>
+    </section>
+
+  </div><!-- /grid-two -->
+
+  <!-- ─────────────────────────────────────
+       TABLE
+  ───────────────────────────────────── -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3 class="panel-title">
+        <span class="panel-title-icon">📋</span>
+        Recent Device Usage
+      </h3>
+      <a href="{{ url_for('export_report') }}" class="btn-export">
+        ↓ Export PDF
+      </a>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data-table" id="usageTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Device</th>
+            <th>Hours</th>
+            <th>Energy (kWh)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          {% for r in records %}
+          <tr>
+            <td>{{ r.usage_date }}</td>
+            <td><span class="device-badge">{{ r.device }}</span></td>
+            <td>{{ r.hours_used }}</td>
+            <td>{{ r.energy_kwh }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="empty-row">No records yet — log your first device above</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- Inject device watt ratings into JS -->
+<script>
+  const DEVICE_RATINGS = {
+    "Fan": 75, "Air Conditioner": 1500, "Washing Machine": 500,
+    "Refrigerator": 150, "TV": 120, "Lights": 60, "Other": 100
+  };
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+</body>
+</html>

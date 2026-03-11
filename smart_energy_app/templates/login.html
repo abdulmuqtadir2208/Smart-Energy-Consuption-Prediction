@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — SmartEnergy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+</head>
+<body>
+
+  <!-- Ambient orbs -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <h1 class="brand-title">Smart<em>Energy</em></h1>
+        <p class="brand-sub">Sign in to your dashboard</p>
+      </div>
+
+      <!-- Error alert -->
+      {% if error %}
+      <div class="alert alert-error">{{ error }}</div>
+      {% endif %}
+
+      <!-- Form -->
+      <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <input type="email" id="email" name="email"
+              placeholder="you@example.com" required autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" name="password"
+              placeholder="••••••••" required autocomplete="current-password" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">Sign In →</button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account? <a href="{{ url_for('signup') }}">Create one</a>
+      </p>
+
+    </div>
+  </div>
+
+</body>
+</html>
